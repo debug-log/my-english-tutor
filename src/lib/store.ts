@@ -3,147 +3,164 @@
 import { create } from "zustand";
 import { Entry, NewEntry } from "@/types";
 import { normalizeContent } from "@/lib/formatter";
-
-const STORAGE_KEY = "english-tutor-entries";
+import { supabase } from "@/lib/supabase";
 
 interface EntryStore {
     entries: Entry[];
     isLoaded: boolean;
+    isLoading: boolean;
+    error: string | null;
+
+    fetchEntries: () => Promise<void>;
     setEntries: (entries: Entry[]) => void;
-    addEntry: (entry: NewEntry) => void;
-    updateEntry: (id: string, updated: Partial<Entry>) => void;
-    deleteEntry: (id: string) => void;
-    importEntries: (entries: Entry[]) => void;
+    addEntry: (entry: NewEntry) => Promise<void>;
+    updateEntry: (id: string, updated: Partial<Entry>) => Promise<void>;
+    deleteEntry: (id: string) => Promise<void>;
+    importEntries: (entries: Entry[]) => Promise<void>;
 }
 
-export const useEntries = create<EntryStore>((set) => ({
+export const useEntries = create<EntryStore>((set, get) => ({
     entries: [],
     isLoaded: false,
+    isLoading: false,
+    error: null,
 
     setEntries: (entries) => set({ entries }),
 
-    addEntry: (entry) =>
-        set((state) => {
-            // Normalize before adding
-            const normalizedEntry = {
-                ...entry,
-                id: crypto.randomUUID(),
-                originalText: normalizeContent(entry.originalText),
-                correction: entry.correction ? normalizeContent(entry.correction) : undefined
+    fetchEntries: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            const { data, error } = await supabase
+                .from('entries')
+                .select('*')
+                .order('date', { ascending: false });
+
+            if (error) throw error;
+
+            // Map db fields if needed, but our schema matches mostly
+            const mappedEntries = (data || []).map(row => ({
+                id: row.id,
+                date: row.date,
+                originalText: row.original_text,
+                correction: row.correction,
+                notes: row.notes,
+                tags: row.tags
+            }));
+
+            set({ entries: mappedEntries, isLoaded: true });
+        } catch (e: any) {
+            set({ error: e.message });
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    addEntry: async (entry) => {
+        set({ isLoading: true, error: null });
+        try {
+            const normalizedOriginal = normalizeContent(entry.originalText);
+            const normalizedCorrection = entry.correction ? normalizeContent(entry.correction) : undefined;
+
+            const newEntryPayload = {
+                date: entry.date,
+                original_text: normalizedOriginal,
+                correction: normalizedCorrection,
+                notes: entry.notes,
+                tags: entry.tags
             };
 
-            const newEntries = [normalizedEntry, ...state.entries];
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(newEntries));
-            return { entries: newEntries };
-        }),
+            const { data, error } = await supabase
+                .from('entries')
+                .insert(newEntryPayload)
+                .select()
+                .single();
 
-    updateEntry: (id, updated) =>
-        set((state) => {
-            const newEntries = state.entries.map((entry) =>
-                entry.id === id ? {
-                    ...entry,
-                    ...updated,
-                    originalText: updated.originalText !== undefined ? normalizeContent(updated.originalText) : entry.originalText,
-                    correction: updated.correction !== undefined ? normalizeContent(updated.correction) : entry.correction
-                } : entry
-            );
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(newEntries));
-            return { entries: newEntries };
-        }),
+            if (error) throw error;
 
-    deleteEntry: (id) =>
-        set((state) => {
-            const newEntries = state.entries.filter((entry) => entry.id !== id);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(newEntries));
-            return { entries: newEntries };
-        }),
+            const newEntry: Entry = {
+                id: data.id,
+                date: data.date,
+                originalText: data.original_text,
+                correction: data.correction,
+                notes: data.notes,
+                tags: data.tags
+            };
 
-    importEntries: (importedEntries) =>
-        set((state) => {
-            const existingKeys = new Set(
-                state.entries.map(e => `${e.date}-${normalizeContent(e.originalText)}`)
-            );
+            set((state) => ({
+                entries: [newEntry, ...state.entries]
+            }));
+        } catch (e: any) {
+            console.error("Failed to add entry", e);
+            set({ error: e.message });
+            throw e;
+        } finally {
+            set({ isLoading: false });
+        }
+    },
 
-            const newUniqueEntries: Entry[] = [];
-
-            importedEntries.forEach(entry => {
-                // Ensure imported data respects current normalization rules
-                const normalizedOriginal = normalizeContent(entry.originalText);
-                const normalizedCorrection = entry.correction ? normalizeContent(entry.correction) : undefined;
-
-                const key = `${entry.date}-${normalizedOriginal}`;
-
-                if (!existingKeys.has(key)) {
-                    existingKeys.add(key); // prevent duplicates within the import itself
-                    newUniqueEntries.push({
-                        ...entry,
-                        id: crypto.randomUUID(), // Always generate new ID to avoid collisions
-                        originalText: normalizedOriginal,
-                        correction: normalizedCorrection
-                    });
-                }
-            });
-
-            if (newUniqueEntries.length === 0) {
-                return state; // No changes
-            }
-
-            const finalEntries = [...newUniqueEntries, ...state.entries];
-            // Sort by date desc (optional, but good practice if mixed)
-            finalEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(finalEntries));
-            return { entries: finalEntries };
-        }),
-}));
-
-// Initialize from localStorage
-if (typeof window !== "undefined") {
-    const store = useEntries.getState();
-
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+    updateEntry: async (id, updated) => {
+        set({ isLoading: true, error: null });
         try {
-            const parsed: Entry[] = JSON.parse(saved);
+            // Prepare update payload
+            const payload: any = {};
+            if (updated.date) payload.date = updated.date;
+            if (updated.originalText) payload.original_text = normalizeContent(updated.originalText);
+            if (updated.correction) payload.correction = normalizeContent(updated.correction);
+            if (updated.notes !== undefined) payload.notes = updated.notes;
+            if (updated.tags) payload.tags = updated.tags;
 
-            const uniqueEntries: Entry[] = [];
-            const seen = new Set();
-            let hasChanges = false;
+            const { data, error } = await supabase
+                .from('entries')
+                .update(payload)
+                .eq('id', id)
+                .select()
+                .single();
 
-            parsed.forEach(entry => {
-                // Apply normalization during migration/load
-                const normalizedOriginalText = normalizeContent(entry.originalText);
-                const normalizedCorrection = entry.correction ? normalizeContent(entry.correction) : undefined;
+            if (error) throw error;
 
-                // Check if normalization changed anything
-                if (normalizedOriginalText !== entry.originalText || normalizedCorrection !== entry.correction) {
-                    hasChanges = true;
-                }
+            set((state) => ({
+                entries: state.entries.map((e) =>
+                    e.id === id ? { ...e, ...updated, originalText: data.original_text, correction: data.correction } : e
+                )
+            }));
+        } catch (e: any) {
+            console.error("Failed to update entry", e);
+            set({ error: e.message });
+            throw e;
+        } finally {
+            set({ isLoading: false });
+        }
+    },
 
-                const key = `${entry.date}-${normalizedOriginalText}`;
-                if (!seen.has(key)) {
-                    seen.add(key);
-                    uniqueEntries.push({
-                        ...entry,
-                        originalText: normalizedOriginalText,
-                        correction: normalizedCorrection,
-                    });
-                } else {
-                    hasChanges = true; // Duplicate removal counts as change
-                }
-            });
+    deleteEntry: async (id) => {
+        set({ isLoading: true, error: null });
+        try {
+            const { error } = await supabase
+                .from('entries')
+                .delete()
+                .eq('id', id);
 
-            store.setEntries(uniqueEntries);
+            if (error) throw error;
 
-            // Update storage if migration occurred
-            if (hasChanges) {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(uniqueEntries));
-            }
-        } catch (e) {
-            console.error("Failed to parse entries from localStorage", e);
+            set((state) => ({
+                entries: state.entries.filter((e) => e.id !== id)
+            }));
+        } catch (e: any) {
+            console.error("Failed to delete entry", e);
+            set({ error: e.message });
+            throw e;
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    importEntries: async (importedEntries) => {
+        // Implement bulk import if needed, or loop insert
+        // prioritizing fetch for now. Logic is complex for bulk upsert, keep simple for now.
+        console.warn("importEntries to Supabase not yet optimized for bulk");
+
+        for (const entry of importedEntries) {
+            await get().addEntry(entry);
         }
     }
-
-    // Set isLoaded to true
-    useEntries.setState({ isLoaded: true });
-}
+}));

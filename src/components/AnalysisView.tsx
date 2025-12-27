@@ -8,9 +8,9 @@ import { useAnalysisStore, AnalysisResult } from "@/lib/analysis-store";
 import styles from "./AnalysisView.module.css";
 import { useEffect, useState } from "react";
 import { useToast } from "@/lib/toast-context";
+import { RefreshCw } from "lucide-react";
 
 // Components from src/components/analysis
-import { WritingSkillChart } from "@/components/analysis/WritingSkillChart";
 import { LevelDiagnosis } from "@/components/analysis/LevelDiagnosis";
 import { WeaknessAnalysis } from "@/components/analysis/WeaknessAnalysis";
 import { StrategySection } from "@/components/analysis/StrategySection";
@@ -19,18 +19,23 @@ import { QuizSection } from "@/components/analysis/QuizSection";
 
 export default function AnalysisView() {
     const { entries, isLoaded } = useEntries();
-    const { history, addAnalysis, getLatestAnalysis } = useAnalysisStore();
+    const { history, addAnalysis, getLatestAnalysis, fetchHistory, isLoading: storeLoading } = useAnalysisStore();
     const [latestAnalysis, setLatestAnalysis] = useState<AnalysisResult | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [localLoading, setLocalLoading] = useState(false);
+    const isLoading = localLoading || storeLoading;
     const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0].id);
     const { addToast } = useToast();
 
     useEffect(() => {
-        const stored = getLatestAnalysis();
-        if (stored) {
-            setLatestAnalysis(stored);
+        fetchHistory();
+    }, [fetchHistory]);
+
+    // Update latestAnalysis whenever history runs or updates
+    useEffect(() => {
+        if (history.length > 0) {
+            setLatestAnalysis(history[0]);
         }
-    }, [getLatestAnalysis]);
+    }, [history]);
 
     const handleAnalyze = async (force = false) => {
         if (entries.length < 3) {
@@ -45,10 +50,10 @@ export default function AnalysisView() {
             return;
         }
 
-        setIsLoading(true);
+        setLocalLoading(true);
         try {
             const result = await analyzeWriting(entries, selectedModel);
-            addAnalysis(result, entries.length);
+            addAnalysis(result);
             setLatestAnalysis(result);
             addToast("학습 분석이 완료되었습니다!");
         } catch (error: any) {
@@ -56,7 +61,7 @@ export default function AnalysisView() {
             const msg = error.message || "분석 중 오류가 발생했습니다.";
             addToast(`오류 발생: ${msg}`, "error");
         } finally {
-            setIsLoading(false);
+            setLocalLoading(false);
         }
     };
 
@@ -108,7 +113,12 @@ export default function AnalysisView() {
                         className={styles.refreshButton}
                         disabled={isLoading}
                     >
-                        {isLoading ? "분석 중..." : "🔄 분석 갱신"}
+                        {isLoading ? "분석 중..." : (
+                            <>
+                                <RefreshCw className={styles.refreshIcon} size={16} />
+                                <span>분석 갱신</span>
+                            </>
+                        )}
                     </button>
 
                 </div>
@@ -139,29 +149,8 @@ export default function AnalysisView() {
             ) : (
                 <div className={styles.reportGrid}>
                     {/* Top Section */}
-                    <section className={styles.topSection}>
-                        <LevelDiagnosis analysis={displayAnalysis} isLoading={isLoading} />
-
-                        <div className={styles.reportCard} style={{ display: 'flex', flexDirection: 'column' }}>
-                            {isLoading ? (
-                                <div className={styles.loadingPlaceholder}>
-                                    <div className={`${styles.skeleton} ${styles.skeletonTitle}`} />
-                                    <div className={styles.skeletonCircle} />
-                                </div>
-                            ) : (
-                                <>
-                                    <h2 className={styles.cardTitle}>📊 작문 스킬 상세 분석</h2>
-                                    <div className={styles.chartContainer}>
-                                        {displayAnalysis.scores ? (
-                                            <WritingSkillChart scores={displayAnalysis.scores} />
-                                        ) : (
-                                            <p className={styles.dateText}>점수 데이터가 없습니다.</p>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    </section>
+                    {/* Main Analysis Section */}
+                    <LevelDiagnosis analysis={displayAnalysis} isLoading={isLoading} />
 
                     <WeaknessAnalysis analysis={displayAnalysis} isLoading={isLoading} />
                     <StrategySection analysis={displayAnalysis} isLoading={isLoading} />

@@ -32,7 +32,7 @@ export function LevelDiagnosis({ analysis, isLoading }: LevelDiagnosisProps) {
             <div className={styles.levelDiagnosis}>
                 <div className={styles.levelMain}>
                     <p className={styles.levelGrade}>{title}</p>
-                    <p className={styles.levelText}>{desc}</p>
+                    {desc && <p className={styles.levelText}>{desc}</p>}
                 </div>
 
                 {analysis.rubricAnalysis && (

@@ -38,25 +38,25 @@ export function StrategySection({ analysis, isLoading }: StrategySectionProps) {
                                 {sc.theory ? (
                                     // New Rich Layout
                                     <div className={styles.strategyBody}>
-                                        <div className={styles.strategySection} style={{ background: '#fdf4ff', border: '1px solid #fae8ff' }}>
-                                            <div className={styles.strategyLabel} style={{ color: '#86198f' }}>
+                                        <div className={styles.strategySubSection}>
+                                            <div className={styles.strategyLabel}>
                                                 <span className={styles.sectionIcon}>💡</span> 핵심 포인트 (Core Point)
                                             </div>
-                                            <div className={styles.strategyContent} style={{ color: '#4a044e' }}>{sc.theory}</div>
+                                            <div className={styles.strategyContent}>{sc.theory}</div>
                                         </div>
 
-                                        <div className={styles.strategySection} style={{ background: '#f0f9ff', border: '1px solid #e0f2fe' }}>
-                                            <div className={styles.strategyLabel} style={{ color: '#0369a1' }}>
+                                        <div className={styles.strategySubSection}>
+                                            <div className={styles.strategyLabel}>
                                                 <span className={styles.sectionIcon}>📋</span> 오늘의 학습 (Study List)
                                             </div>
-                                            <div className={styles.strategyContent} style={{ color: '#0c4a6e' }}>{sc.mechanics}</div>
+                                            <div className={styles.strategyContent}>{sc.mechanics}</div>
                                         </div>
 
-                                        <div className={styles.strategySection} style={{ background: '#f0fdf4', border: '1px solid #dcfce7' }}>
-                                            <div className={styles.strategyLabel} style={{ color: '#15803d' }}>
+                                        <div className={styles.strategySubSection}>
+                                            <div className={styles.strategyLabel}>
                                                 <span className={styles.sectionIcon}>🚀</span> 실전 응용 (Action Item)
                                             </div>
-                                            <div className={styles.strategyContent} style={{ color: '#14532d' }}>{sc.application}</div>
+                                            <div className={styles.strategyContent}>{sc.application}</div>
                                         </div>
 
                                         {sc.message && (

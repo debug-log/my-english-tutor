@@ -28,20 +28,39 @@ export function WeaknessAnalysis({ analysis, isLoading }: WeaknessAnalysisProps)
         <div className={styles.reportCard}>
             <h2 className={styles.cardTitle}>🔍 자주 틀리는 패턴 & 개선점</h2>
             <div className={styles.verticalList}>
-                {(analysis.grammarPatterns || []).map((item, idx) => (
-                    <div key={idx} style={{ marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--border)' }}>
-                        <h3 style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'var(--destructive)' }}>
-                            {idx + 1}. {item.pattern}
-                        </h3>
-                        <p style={{ margin: '0 0 1rem 0', lineHeight: 1.6 }}>{item.explanation}</p>
-                        {(item.examples || []).map((ex, exIdx) => (
-                            <div key={exIdx} style={{ background: 'var(--muted)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.9rem', marginBottom: '0.75rem' }}>
-                                <div style={{ color: 'var(--destructive)', textDecoration: 'line-through', marginBottom: '0.25rem' }}>❌ {ex.incorrect}</div>
-                                <div style={{ color: 'var(--primary)', fontWeight: 600 }}>✅ {ex.correct}</div>
+                {(analysis.grammarPatterns || []).map((item, idx) => {
+                    const parts = item.explanation.split('💡 선생님의 팁:');
+                    const mainExpl = parts[0].trim();
+                    const tipText = parts.length > 1 ? parts[1].trim() : null;
+
+                    return (
+                        <div key={idx} className={styles.weaknessItem}>
+                            <h3 className={styles.weaknessTitle}>
+                                <span className={styles.weaknessIndex}>{idx + 1}.</span> {item.pattern}
+                            </h3>
+                            <div className={styles.weaknessContent}>
+                                <p className={styles.weaknessText}>{mainExpl}</p>
+                                {tipText && (
+                                    <div className={styles.tipBox}>
+                                        <span className={styles.tipIcon}>💡</span>
+                                        <div className={styles.tipContent}>
+                                            <span className={styles.tipLabel}>선생님의 팁:</span>
+                                            {tipText}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        ))}
-                    </div>
-                ))}
+                            <div className={styles.exampleList}>
+                                {(item.examples || []).map((ex, exIdx) => (
+                                    <div key={exIdx} className={styles.exampleItem}>
+                                        <div className={styles.incorrectSentence}>❌ {ex.incorrect}</div>
+                                        <div className={styles.correctSentence}>✅ {ex.correct}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );

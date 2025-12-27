@@ -4,7 +4,7 @@ import { useEntries } from "@/lib/store";
 import EntryForm from "@/components/EntryForm";
 import EntryList from "@/components/EntryList";
 import styles from "./page.module.css";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Entry, NewEntry } from "@/types";
 import { useToast } from "@/lib/toast-context";
 import Modal from "@/components/Modal";
@@ -12,24 +12,31 @@ import Modal from "@/components/Modal";
 import AnalysisView from "@/components/AnalysisView";
 
 export default function Home() {
-  const { entries, addEntry, updateEntry, deleteEntry, importEntries, isLoaded } = useEntries();
+  const { entries, fetchEntries, addEntry, updateEntry, deleteEntry, importEntries, isLoaded } = useEntries();
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [activeTab, setActiveTab] = useState<'write' | 'list' | 'analysis'>('write');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { addToast } = useToast();
 
-  if (!isLoaded) return null;
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
 
-  const handleSaveEntry = (data: NewEntry) => {
-    // ... same logic ...
-    if (editingEntry) {
-      updateEntry(editingEntry.id, data);
-      addToast("일기가 수정되었습니다.");
-      setEditingEntry(null);
-    } else {
-      addEntry(data);
-      addToast("새로운 피드가 저장되었습니다!");
-      // setActiveTab('list'); // Stay on write tab
+  if (!isLoaded) return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading your tutor...</div>;
+
+  const handleSaveEntry = async (data: NewEntry) => {
+    try {
+      if (editingEntry) {
+        await updateEntry(editingEntry.id, data);
+        addToast("일기가 수정되었습니다.");
+        setEditingEntry(null);
+      } else {
+        await addEntry(data);
+        addToast("새로운 피드가 저장되었습니다!");
+        // setActiveTab('list'); // Stay on write tab
+      }
+    } catch (e) {
+      addToast("저장에 실패했습니다.", "error");
     }
   };
 
@@ -152,7 +159,16 @@ export default function Home() {
             {/* <h2 className={styles.sectionTitle}>전체 기록</h2> */}
             <EntryList
               entries={entries}
-              onDelete={deleteEntry}
+              onDelete={async (id) => {
+                if (confirm('정말 삭제하시겠습니까?')) {
+                  try {
+                    await deleteEntry(id);
+                    addToast("삭제되었습니다.");
+                  } catch (e) {
+                    addToast("삭제 실패", "error");
+                  }
+                }
+              }}
               onEdit={handleEdit}
             />
           </section>

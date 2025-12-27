@@ -47,7 +47,7 @@ export function QuizSection({ analysis, isLoading }: QuizSectionProps) {
             <h2 className={styles.cardTitle}>📝 실전 연습 퀴즈</h2>
             <div className={styles.quizList}>
                 {(analysis.quiz || []).map((q, qIdx) => (
-                    <div key={qIdx} className={styles.quizCard} style={{ border: 'none', padding: 0, background: 'transparent', boxShadow: 'none' }}>
+                    <div key={qIdx} className={styles.quizCard}>
                         <p className={styles.quizQuestion}>Q{qIdx + 1}. {q.question}</p>
                         <div className={styles.optionList}>
                             {q.options.map((opt, optIdx) => {

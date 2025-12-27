@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { supabase } from "@/lib/supabase";
 
 export interface AnalysisResult {
     date: string;
@@ -22,60 +22,77 @@ export interface AnalysisResult {
         coherence: number;
         clarity: number;
         expression: number;
+        // make checks specific if needed
     };
-    rubricAnalysis?: {
-        grammar: string;
-        vocabulary: string;
-        coherence: string;
-        clarity: string;
-        expression: string;
-    };
-    entryDateRange?: {
-        start: string;
-        end: string;
-    };
-    level: string;
-    levelDescription?: string;
-    strategy: (string | {
-        action: string;
-        example: string;
-        // New structured fields
-        theory?: string;
-        mechanics?: string;
-        application?: string;
-        message?: string;
-    })[];
-    vocabularyList?: { word: string; meaning: string; example: string }[];
-    quiz: { question: string; options: string[]; answer: number; explanation: string }[];
-    rawDeepInsight?: any;
+    // Relaxed typing for now to match JSON structure stored
+    [key: string]: any;
 }
 
 interface AnalysisState {
     history: AnalysisResult[];
-    lastEntryCount: number;
-    addAnalysis: (result: AnalysisResult, entryCount: number) => void;
-    clearHistory: () => void;
+    isLoading: boolean;
+    error: string | null;
+
+    fetchHistory: () => Promise<void>;
+    addAnalysis: (result: AnalysisResult) => Promise<void>;
+    clearHistory: () => Promise<void>;
     getLatestAnalysis: () => AnalysisResult | null;
 }
 
-export const useAnalysisStore = create<AnalysisState>()(
-    persist(
-        (set, get) => ({
-            history: [],
-            lastEntryCount: 0,
-            addAnalysis: (result, entryCount) =>
-                set((state) => ({
-                    history: [result, ...state.history],
-                    lastEntryCount: entryCount,
-                })),
-            clearHistory: () => set({ history: [], lastEntryCount: 0 }),
-            getLatestAnalysis: () => {
-                const { history } = get();
-                return history.length > 0 ? history[0] : null;
-            },
-        }),
-        {
-            name: "english-tutor-analysis-storage",
+export const useAnalysisStore = create<AnalysisState>((set, get) => ({
+    history: [],
+    isLoading: false,
+    error: null,
+
+    fetchHistory: async () => {
+        set({ isLoading: true, error: null });
+        try {
+            const { data, error } = await supabase
+                .from('analysis_history')
+                .select('*')
+                .order('date', { ascending: false });
+
+            if (error) throw error;
+
+            const mappedHistory = (data || []).map(row => row.result as AnalysisResult);
+            set({ history: mappedHistory });
+        } catch (e: any) {
+            set({ error: e.message });
+        } finally {
+            set({ isLoading: false });
         }
-    )
-);
+    },
+
+    addAnalysis: async (result) => {
+        set({ isLoading: true, error: null });
+        try {
+            const { error } = await supabase
+                .from('analysis_history')
+                .insert({
+                    date: new Date().toISOString(), // Use current timestamp for record or result.date? Usually result.date matches entry date
+                    result: result
+                });
+
+            if (error) throw error;
+
+            set((state) => ({ history: [result, ...state.history] }));
+        } catch (e: any) {
+            console.error("Failed to save analysis", e);
+            set({ error: e.message });
+            throw e; // Let UI handle
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    clearHistory: async () => {
+        // Maybe dangerous to allow clearing all history in DB?
+        // For now just clear local state or implement soft delete
+        set({ history: [] });
+    },
+
+    getLatestAnalysis: () => {
+        const { history } = get();
+        return history.length > 0 ? history[0] : null;
+    },
+}));

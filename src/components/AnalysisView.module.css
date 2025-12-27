@@ -4,6 +4,12 @@
     flex-direction: column;
     gap: 2rem;
     width: 100%;
+    max-width: 840px;
+    /* Constrain width for better readability */
+    margin: 0 auto;
+    /* Center the container */
+    padding: 0 1rem;
+    /* Ensure some padding on small screens */
     animation: fadeIn 0.3s ease-in-out;
 }
 
@@ -92,6 +98,14 @@
     box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
 }
 
+.refreshIcon {
+    transition: transform 0.5s ease;
+}
+
+.refreshButton:hover .refreshIcon {
+    transform: rotate(180deg);
+}
+
 .refreshButton:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
@@ -157,7 +171,7 @@
     margin-top: 0.5rem;
 }
 
-/* Grid Layout from page.module.css */
+/* Grid Layout */
 .reportGrid {
     display: flex;
     flex-direction: column;
@@ -166,7 +180,7 @@
 
 .topSection {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 2fr 1fr;
     gap: 2rem;
 }
 
@@ -209,7 +223,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 300px;
+    min-height: 220px;
 }
 
 .dateText {
@@ -260,5 +274,403 @@
 
     100% {
         opacity: 0.6;
+    }
+}
+
+/* Level Diagnosis Styles */
+.levelDiagnosis {
+    display: flex;
+    flex-direction: column;
+}
+
+.levelMain {
+    background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+    color: white;
+    padding: 0.75rem 1.5rem !important;
+    /* Reduced vertical padding */
+    border-radius: var(--radius);
+    text-align: center;
+    box-shadow: 0 4px 6px #0000001a;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+.levelGrade {
+    font-size: 1.25rem !important;
+    font-weight: 700;
+    margin: 0 !important;
+    /* Remove all margins to ensure centering */
+    letter-spacing: -0.01em;
+}
+
+.levelText {
+    font-size: 0.95rem;
+    opacity: 0.95;
+    line-height: 1.5;
+    margin: 0 !important;
+    /* Remove margins */
+}
+
+.rubricGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    /* Stack vertically for better readability in narrow layout */
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+
+.rubricItem {
+    background: var(--muted);
+    padding: 1.25rem;
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: left;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.rubricItem:hover {
+    border-color: var(--border);
+    background: var(--background);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.rubricLabel {
+    font-size: 0.75rem;
+    color: var(--primary);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0.5rem;
+    width: fit-content;
+}
+
+.rubricValue {
+    font-size: 0.95rem;
+    font-weight: 400;
+    color: var(--foreground);
+    line-height: 1.6;
+    word-break: keep-all;
+    /* Better Korean wrapping */
+}
+
+/* Shared Card Style */
+.cardBox {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    /* Removed hover effects to reduce distraction */
+}
+
+/* Weakness Analysis Styles */
+.verticalList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.weaknessItem {
+    composes: cardBox;
+    border-left: 3px solid var(--destructive);
+    /* Subtle indicator instead of full color */
+}
+
+.weaknessTitle {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--foreground);
+    /* Changed from destructive to neutral */
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.weaknessIndex {
+    color: var(--destructive);
+    font-weight: 800;
+}
+
+.weaknessContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.weaknessText {
+    line-height: 1.7;
+    color: var(--foreground);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.tipBox {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.tipIcon {
+    font-size: 1.1rem;
+}
+
+.tipContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.tipLabel {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 0.85rem;
+}
+
+.exampleList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.exampleItem {
+    background: #f8fafc;
+    /* Slate-50 for better contrast against white card */
+    border: 1px solid #e2e8f0;
+    /* Slate-200 */
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.incorrectSentence {
+    color: var(--destructive);
+    text-decoration: line-through;
+    opacity: 0.8;
+}
+
+.correctSentence {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Strategy Section Styles */
+.strategyList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.strategyItem {
+    composes: cardBox;
+}
+
+.strategyHeader {
+    margin-bottom: 1rem;
+}
+
+.strategyTitle {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--foreground);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.strategyBody {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Strategy Sub-sections */
+.strategySubSection {
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    background: #f8fafc;
+    /* Neutral Slate-50 */
+    border: 1px solid #e2e8f0;
+    /* Neutral Slate-200 */
+}
+
+.strategyLabel {
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--foreground);
+    /* Neutral text */
+}
+
+.sectionIcon {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.strategyContent {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+    padding-left: 0.2rem;
+}
+
+.teacherMessage {
+    background: #ffffff;
+    border: 1px dashed #cbd5e1;
+    /* Dashed gray border for "note" feel */
+    color: var(--foreground);
+    padding: 1rem;
+    border-radius: 8px;
+    display: flex;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    align-items: flex-start;
+    margin-top: 0.5rem;
+}
+
+/* Vocabulary Section Styles */
+.vocabGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.vocabCard {
+    composes: cardBox;
+    gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.vocabCard:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+.vocabWord {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.vocabMeaning {
+    font-size: 0.95rem;
+    color: var(--foreground);
+    font-weight: 500;
+}
+
+.vocabExample {
+    font-size: 0.9rem;
+    color: var(--muted-foreground);
+    font-style: italic;
+    margin-top: 0.25rem;
+    line-height: 1.4;
+}
+
+/* Quiz Section Styles */
+.quizList {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.quizCard {
+    composes: cardBox;
+}
+
+.quizQuestion {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.optionList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.optionBtn {
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--background);
+    color: var(--foreground);
+    text-align: left;
+    transition: all 0.2s;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.optionBtn:hover:not(:disabled) {
+    background: var(--muted);
+    border-color: var(--primary);
+}
+
+.optionBtn.selected {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.optionBtn.correct {
+    background: #dcfce7;
+    border-color: #22c55e;
+    color: #15803d;
+}
+
+.optionBtn.incorrect {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+}
+
+.explanation {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--secondary);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--foreground);
+    border-left: 4px solid var(--primary);
+    animation: fadeIn 0.3s ease-out;
+}
+
+@media (max-width: 640px) {
+    .rubricGrid {
+        grid-template-columns: 1fr;
     }
 }
