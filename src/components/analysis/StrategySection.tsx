@@ -24,7 +24,7 @@ export function StrategySection({ analysis, isLoading }: StrategySectionProps) {
         <div className={styles.reportCard}>
             <h2 className={styles.cardTitle}>💡 맞춤 학습 전략</h2>
             <ul className={styles.strategyList}>
-                {(analysis.strategy || []).map((sc, idx) => (
+                {(analysis.strategy || []).map((sc: any, idx: number) => (
                     <li key={idx} className={styles.strategyItem}>
                         {typeof sc === 'string' ? (
                             sc

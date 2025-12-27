@@ -46,11 +46,11 @@ export function QuizSection({ analysis, isLoading }: QuizSectionProps) {
         <div className={styles.reportCard}>
             <h2 className={styles.cardTitle}>📝 실전 연습 퀴즈</h2>
             <div className={styles.quizList}>
-                {(analysis.quiz || []).map((q, qIdx) => (
+                {(analysis.quiz || []).map((q: any, qIdx: number) => (
                     <div key={qIdx} className={styles.quizCard}>
                         <p className={styles.quizQuestion}>Q{qIdx + 1}. {q.question}</p>
                         <div className={styles.optionList}>
-                            {q.options.map((opt, optIdx) => {
+                            {q.options.map((opt: string, optIdx: number) => {
                                 const isSelected = selectedQuizAnswer[qIdx] === optIdx;
                                 const isCorrect = q.answer === optIdx;
                                 const isRevealed = showExplanation[qIdx];

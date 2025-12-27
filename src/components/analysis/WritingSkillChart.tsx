@@ -40,7 +40,7 @@ export function WritingSkillChart({ scores }: WritingSkillChartProps) {
                 <Tooltip
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
                     itemStyle={{ color: '#1f2937', fontWeight: 600 }}
-                    formatter={(value: number) => [`${value}점`, 'Total Score']}
+                    formatter={(value: any) => [`${value}점`, 'Total Score']}
                 />
             </RadarChart>
         </ResponsiveContainer>

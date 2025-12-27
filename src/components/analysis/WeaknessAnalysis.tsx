@@ -28,7 +28,7 @@ export function WeaknessAnalysis({ analysis, isLoading }: WeaknessAnalysisProps)
         <div className={styles.reportCard}>
             <h2 className={styles.cardTitle}>🔍 자주 틀리는 패턴 & 개선점</h2>
             <div className={styles.verticalList}>
-                {(analysis.grammarPatterns || []).map((item, idx) => {
+                {(analysis.grammarPatterns || []).map((item: any, idx: number) => {
                     const parts = item.explanation.split('💡 선생님의 팁:');
                     const mainExpl = parts[0].trim();
                     const tipText = parts.length > 1 ? parts[1].trim() : null;
@@ -51,7 +51,7 @@ export function WeaknessAnalysis({ analysis, isLoading }: WeaknessAnalysisProps)
                                 )}
                             </div>
                             <div className={styles.exampleList}>
-                                {(item.examples || []).map((ex, exIdx) => (
+                                {(item.examples || []).map((ex: any, exIdx: number) => (
                                     <div key={exIdx} className={styles.exampleItem}>
                                         <div className={styles.incorrectSentence}>❌ {ex.incorrect}</div>
                                         <div className={styles.correctSentence}>✅ {ex.correct}</div>

@@ -24,7 +24,7 @@ export function VocabularySection({ analysis, isLoading }: VocabularySectionProp
         <div className={styles.reportCard}>
             <h2 className={styles.cardTitle}>📚 추천 어휘 10선</h2>
             <div className={styles.vocabGrid}>
-                {(analysis.vocabularyList || []).map((v, idx) => (
+                {(analysis.vocabularyList || []).map((v: any, idx: number) => (
                     <div key={idx} className={styles.vocabCard}>
                         <div className={styles.vocabWord}>{v.word}</div>
                         <div className={styles.vocabMeaning}>{v.meaning}</div>
