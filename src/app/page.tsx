@@ -10,16 +10,31 @@ import { useToast } from "@/lib/toast-context";
 import Modal from "@/components/Modal";
 
 import AnalysisView from "@/components/AnalysisView";
+import Auth from "@/components/Auth";
+import { useAuth } from "@/lib/auth-store";
 
 export default function Home() {
+  const { session, isLoading: isAuthLoading, initialize: initializeAuth, signOut } = useAuth();
   const { entries, fetchEntries, addEntry, updateEntry, deleteEntry, isLoaded, error } = useEntries();
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [activeTab, setActiveTab] = useState<'write' | 'list' | 'analysis'>('write');
   const { addToast } = useToast();
 
   useEffect(() => {
-    fetchEntries();
-  }, [fetchEntries]);
+    initializeAuth();
+  }, [initializeAuth]);
+
+  useEffect(() => {
+    if (session) {
+      fetchEntries();
+    }
+  }, [session, fetchEntries]);
+
+  if (isAuthLoading) return <div className="min-h-screen flex items-center justify-center text-gray-500">Initializing...</div>;
+
+  if (!session) {
+    return <Auth />;
+  }
 
   if (!isLoaded && !error) return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading your tutor...</div>;
 
@@ -94,11 +109,16 @@ export default function Home() {
       <header className={styles.header}>
         <div className={styles.headerTop}>
           <h1 className={styles.title}>내 영어 과외 선생님</h1>
-
+          <button
+            onClick={() => {
+              if (confirm('로그아웃 하시겠습니까?')) signOut();
+            }}
+            className={styles.logoutButton}
+          >
+            로그아웃
+          </button>
         </div>
         <p className={styles.subtitle}>매일 쓰고, 교정받고, 성장하세요</p>
-
-
       </header>
 
       {/* Tabs */}
