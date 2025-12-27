@@ -12,7 +12,7 @@ import Modal from "@/components/Modal";
 import AnalysisView from "@/components/AnalysisView";
 
 export default function Home() {
-  const { entries, fetchEntries, addEntry, updateEntry, deleteEntry, isLoaded } = useEntries();
+  const { entries, fetchEntries, addEntry, updateEntry, deleteEntry, isLoaded, error } = useEntries();
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [activeTab, setActiveTab] = useState<'write' | 'list' | 'analysis'>('write');
   const { addToast } = useToast();
@@ -21,7 +21,49 @@ export default function Home() {
     fetchEntries();
   }, [fetchEntries]);
 
-  if (!isLoaded) return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading your tutor...</div>;
+  if (!isLoaded && !error) return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading your tutor...</div>;
+
+  if (error && !isLoaded) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-[#f8fafc]">
+        <div className="bg-white p-8 rounded-2xl shadow-xl shadow-blue-100/50 max-w-md w-full border border-blue-50 text-center animate-in fade-in zoom-in duration-300">
+          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>
+          </div>
+          <h2 className="text-2xl font-bold text-slate-800 mb-3">연결 설정 확인 필요</h2>
+          <p className="text-slate-600 mb-8 leading-relaxed">
+            데이터베이스(Supabase)와 통신할 수 없습니다. 배포 환경의 보안 비밀(Secrets) 설정을 확인해주세요.
+          </p>
+
+          <div className="space-y-3">
+            <button
+              onClick={() => fetchEntries()}
+              className="w-full py-3.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all active:scale-[0.98] shadow-lg shadow-blue-200"
+            >
+              다시 연결 시도
+            </button>
+            <button
+              onClick={() => useEntries.setState({ isLoaded: true })}
+              className="w-full py-3.5 bg-slate-50 text-slate-600 rounded-xl font-medium hover:bg-slate-100 transition-all"
+            >
+              오프라인 모드로 둘러보기
+            </button>
+          </div>
+
+          <div className="mt-8 p-4 bg-slate-50 rounded-xl text-left">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">도움말 (GitHub Actions 설정)</p>
+            <ol className="text-sm text-slate-600 space-y-2 list-decimal ml-4">
+              <li>GitHub 저장소 <b>Settings</b>로 이동</li>
+              <li><b>Secrets and variables → Actions</b> 클릭</li>
+              <li><code>NEXT_PUBLIC_SUPABASE_URL</code> 추가</li>
+              <li><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> 추가</li>
+              <li>Actions 탭에서 워크플로우를 재실행하세요.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSaveEntry = async (data: NewEntry) => {
     try {
