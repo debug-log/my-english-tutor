@@ -21,14 +21,19 @@ export default function Home() {
   const { addToast } = useToast();
 
   useEffect(() => {
-    initializeAuth();
+    const startup = async () => {
+      // 1. Auth initialization (only runs once due to store guard)
+      await initializeAuth();
+    };
+    startup();
   }, [initializeAuth]);
 
   useEffect(() => {
-    if (session) {
+    // 2. Fetch data only when session is confirmed and not currently loading or already loaded
+    if (!isAuthLoading && session && !isLoaded && !useEntries.getState().isLoading) {
       fetchEntries();
     }
-  }, [session, fetchEntries]);
+  }, [session, isAuthLoading, isLoaded, fetchEntries]);
 
   if (isAuthLoading) return <div className="min-h-screen flex items-center justify-center text-gray-500">Initializing...</div>;
 

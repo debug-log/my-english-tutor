@@ -1,7 +1,7 @@
 import { Entry } from "@/types";
 import EntryCard from "./EntryCard";
 import styles from "./EntryList.module.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface EntryListProps {
     entries: Entry[];
@@ -19,8 +19,13 @@ export default function EntryList({ entries, onDelete, onEdit, onUpdate }: Entry
         );
     }
 
-    // State for pagination
+    // State for pagination and hydration
     const [visibleCount, setVisibleCount] = useState(5);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Group entries by date
     const groupedEntries = entries.reduce((groups, entry) => {
@@ -49,12 +54,12 @@ export default function EntryList({ entries, onDelete, onEdit, onUpdate }: Entry
             {visibleDates.map((date) => (
                 <div key={date} className={styles.dateGroup}>
                     <h3 className={styles.dateHeader}>
-                        {new Date(date).toLocaleDateString('ko-KR', {
+                        {isMounted ? new Date(date).toLocaleDateString('ko-KR', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',
                             weekday: 'long'
-                        })}
+                        }) : date}
                     </h3>
                     <div className={styles.entriesGrid}>
                         {groupedEntries[date].map((entry) => (

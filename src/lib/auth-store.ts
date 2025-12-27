@@ -13,7 +13,7 @@ interface AuthStore {
     initialize: () => Promise<void>;
 }
 
-export const useAuth = create<AuthStore>((set) => ({
+export const useAuth = create<AuthStore>((set, get) => ({
     session: null,
     user: null,
     isLoading: true,
@@ -33,6 +33,7 @@ export const useAuth = create<AuthStore>((set) => ({
     },
 
     initialize: async () => {
+        if (get().isInitialized) return;
         try {
             const { data: { session } } = await supabase.auth.getSession();
             set({

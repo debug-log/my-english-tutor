@@ -28,6 +28,7 @@ export const useEntries = create<EntryStore>((set, get) => ({
     setEntries: (entries) => set({ entries }),
 
     fetchEntries: async () => {
+        if (get().isLoading) return;
         set({ isLoading: true, error: null });
         try {
             const { data, error } = await supabase
