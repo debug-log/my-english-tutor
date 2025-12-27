@@ -18,7 +18,7 @@ if (!isValidUrl(supabaseUrl)) {
 
 export const supabase = createClient(
     isValidUrl(supabaseUrl) ? supabaseUrl : 'https://placeholder.supabase.co',
-    supabaseAnonKey
+    supabaseAnonKey || 'placeholder-anon-key'
 );
 
 // Instrument Supabase for Debug Logging
