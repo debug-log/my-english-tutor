@@ -4,6 +4,8 @@ export interface Entry {
     originalText: string;
     correction?: string;
     notes?: string;
+    aiCorrection?: string;
+    aiNotes?: string;
     tags?: string[];
 }
 

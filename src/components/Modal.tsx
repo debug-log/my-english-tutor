@@ -6,9 +6,10 @@ interface ModalProps {
     isOpen: boolean;
     onClose: () => void;
     children: React.ReactNode;
+    compact?: boolean;
 }
 
-export default function Modal({ isOpen, onClose, children }: ModalProps) {
+export default function Modal({ isOpen, onClose, children, compact = false }: ModalProps) {
     const overlayRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -44,7 +45,7 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
             ref={overlayRef}
             onClick={handleOverlayClick}
         >
-            <div className={styles.content}>
+            <div className={`${styles.content} ${compact ? styles.compact : ""}`}>
                 <button
                     className={styles.closeButton}
                     onClick={onClose}

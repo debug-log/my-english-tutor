@@ -39,15 +39,72 @@ export function LevelDiagnosis({ analysis, isLoading }: LevelDiagnosisProps) {
                     <div className={styles.rubricGrid}>
                         <div className={styles.rubricItem}>
                             <span className={styles.rubricLabel}>문법 (Grammar)</span>
-                            <div className={styles.rubricValue}>{analysis.rubricAnalysis.grammar}</div>
+                            <div className={styles.rubricValue}>
+                                {typeof analysis.rubricAnalysis.grammar === 'string' ? analysis.rubricAnalysis.grammar : (
+                                    <>
+                                        <div>{analysis.rubricAnalysis.grammar?.diagnosis}</div>
+                                        <div className={styles.rubricImprovement}>
+                                            💡 {analysis.rubricAnalysis.grammar?.improvement}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
                         <div className={styles.rubricItem}>
                             <span className={styles.rubricLabel}>어휘 (Vocab)</span>
-                            <div className={styles.rubricValue}>{analysis.rubricAnalysis.vocabulary}</div>
+                            <div className={styles.rubricValue}>
+                                {typeof analysis.rubricAnalysis.vocabulary === 'string' ? analysis.rubricAnalysis.vocabulary : (
+                                    <>
+                                        <div>{analysis.rubricAnalysis.vocabulary?.diagnosis}</div>
+                                        <div className={styles.rubricImprovement}>
+                                            💡 {analysis.rubricAnalysis.vocabulary?.improvement}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                        <div className={styles.rubricItem}>
+                            <span className={styles.rubricLabel}>논리 (Logic)</span>
+                            <div className={styles.rubricValue}>
+                                {typeof analysis.rubricAnalysis.logic === 'string' ? analysis.rubricAnalysis.logic : (
+                                    <>
+                                        <div>{analysis.rubricAnalysis.logic?.diagnosis}</div>
+                                        <div className={styles.rubricImprovement}>
+                                            💡 {analysis.rubricAnalysis.logic?.improvement}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
                         <div className={styles.rubricItem}>
                             <span className={styles.rubricLabel}>자연스러움 (Flow)</span>
-                            <div className={styles.rubricValue}>{analysis.rubricAnalysis.coherence}</div>
+                            <div className={styles.rubricValue}>
+                                {typeof analysis.rubricAnalysis.flow === 'string' ? analysis.rubricAnalysis.flow : (
+                                    <>
+                                        <div>{analysis.rubricAnalysis.flow?.diagnosis}</div>
+                                        <div className={styles.rubricImprovement}>
+                                            💡 {analysis.rubricAnalysis.flow?.improvement}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                        <div className={styles.rubricItem}>
+                            <span className={styles.rubricLabel}>어조 (Tone)</span>
+                            <div className={styles.rubricValue}>
+                                {typeof analysis.rubricAnalysis.tone === 'string' ? analysis.rubricAnalysis.tone : (
+                                    (analysis.rubricAnalysis.tone || (analysis.rubricAnalysis as any).professionalism) ? (
+                                        <>
+                                            <div>{analysis.rubricAnalysis.tone?.diagnosis || (analysis.rubricAnalysis as any).professionalism}</div>
+                                            {analysis.rubricAnalysis.tone?.improvement && (
+                                                <div className={styles.rubricImprovement}>
+                                                    💡 {analysis.rubricAnalysis.tone.improvement}
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : null
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}

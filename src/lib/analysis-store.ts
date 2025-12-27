@@ -16,6 +16,13 @@ export interface AnalysisResult {
         analysis: string;
         suggestions: string[];
     };
+    rubricAnalysis?: {
+        grammar: { diagnosis: string; improvement: string; };
+        vocabulary: { diagnosis: string; improvement: string; };
+        logic: { diagnosis: string; improvement: string; };
+        flow: { diagnosis: string; improvement: string; };
+        tone: { diagnosis: string; improvement: string; };
+    };
     scores?: {
         grammar: number;
         vocabulary: number;
@@ -32,8 +39,9 @@ interface AnalysisState {
     history: AnalysisResult[];
     isLoading: boolean;
     error: string | null;
+    _fetchPromise: Promise<void> | null;
 
-    fetchHistory: () => Promise<void>;
+    fetchHistory: (force?: boolean) => Promise<void>;
     addAnalysis: (result: AnalysisResult) => Promise<void>;
     clearHistory: () => Promise<void>;
     getLatestAnalysis: () => AnalysisResult | null;
@@ -43,24 +51,39 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
     history: [],
     isLoading: false,
     error: null,
+    _fetchPromise: null,
 
-    fetchHistory: async () => {
-        set({ isLoading: true, error: null });
-        try {
-            const { data, error } = await supabase
-                .from('analysis_history')
-                .select('*')
-                .order('date', { ascending: false });
+    fetchHistory: async (force = false) => {
+        const { history, _fetchPromise } = get();
 
-            if (error) throw error;
+        // 1. If data exists and not forced, return immediately
+        if (!force && history.length > 0) return;
 
-            const mappedHistory = (data || []).map(row => row.result as AnalysisResult);
-            set({ history: mappedHistory });
-        } catch (e: any) {
-            set({ error: e.message });
-        } finally {
-            set({ isLoading: false });
-        }
+        // 2. If already fetching, return existing promise to prevent duplicate calls
+        if (_fetchPromise) return _fetchPromise;
+
+        // 3. Create new fetch promise
+        const promise = (async () => {
+            set({ isLoading: true, error: null });
+            try {
+                const { data, error } = await supabase
+                    .from('analysis_history')
+                    .select('*')
+                    .order('date', { ascending: false });
+
+                if (error) throw error;
+
+                const mappedHistory = (data || []).map(row => row.result as AnalysisResult);
+                set({ history: mappedHistory });
+            } catch (e: any) {
+                set({ error: e.message });
+            } finally {
+                set({ isLoading: false, _fetchPromise: null });
+            }
+        })();
+
+        set({ _fetchPromise: promise });
+        return promise;
     },
 
     addAnalysis: async (result) => {

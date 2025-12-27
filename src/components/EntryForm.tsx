@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Entry, NewEntry } from "@/types";
-import { correctText } from "@/lib/ai";
 import { normalizeContent } from "@/lib/formatter";
 import styles from "./EntryForm.module.css";
 
@@ -15,7 +14,6 @@ export default function EntryForm({ initialData, onSave, onCancel }: EntryFormPr
     const [originalText, setOriginalText] = useState("");
     const [correction, setCorrection] = useState("");
     const [notes, setNotes] = useState("");
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     useEffect(() => {
         if (initialData) {
@@ -31,28 +29,6 @@ export default function EntryForm({ initialData, onSave, onCancel }: EntryFormPr
             setNotes("");
         }
     }, [initialData]);
-
-    const handleAICorrect = async () => {
-        if (!originalText) return;
-        setIsAnalyzing(true);
-        try {
-            // Normalize before sending to AI to get better results
-            const normalizedInput = normalizeContent(originalText);
-            // Update UI to reflect normalization immediately? Or wait? 
-            // User said "Preprocessing when saved", but usually good to see what you send.
-            // Let's update state so user sees the cleaned version.
-            setOriginalText(normalizedInput);
-
-            const result = await correctText(normalizedInput);
-            setCorrection(result.correction);
-            setNotes((prev) => prev ? prev + "\n" + result.notes : result.notes);
-        } catch (e) {
-            console.error(e);
-            alert("AI 첨삭 실패");
-        } finally {
-            setIsAnalyzing(false);
-        }
-    };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -137,14 +113,6 @@ export default function EntryForm({ initialData, onSave, onCancel }: EntryFormPr
 
 
             <div className={styles.actions}>
-                <button
-                    type="button"
-                    onClick={handleAICorrect}
-                    disabled={isAnalyzing || !originalText.trim()}
-                    className={`${styles.button} ${styles.aiButton}`}
-                >
-                    {isAnalyzing ? "분석 중..." : "AI 첨삭 받기"}
-                </button>
                 <button type="submit" className={styles.button}>
                     {initialData ? "수정 완료" : "저장하기"}
                 </button>

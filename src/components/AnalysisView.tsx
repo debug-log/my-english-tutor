@@ -24,6 +24,8 @@ export default function AnalysisView() {
     const [localLoading, setLocalLoading] = useState(false);
     const isLoading = localLoading || storeLoading;
     const [selectedModel, setSelectedModel] = useState(AVAILABLE_MODELS[0].id);
+    const [dateRange, setDateRange] = useState("all");
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const { addToast } = useToast();
 
     useEffect(() => {
@@ -37,9 +39,35 @@ export default function AnalysisView() {
         }
     }, [history]);
 
+    const onAnalyzeClick = () => {
+        setIsSettingsOpen(true);
+    };
+
+    const onConfirmAnalyze = () => {
+        setIsSettingsOpen(false);
+        handleAnalyze(true);
+    };
+
     const handleAnalyze = async (force = false) => {
-        if (entries.length < 3) {
-            addToast("분석을 위해서는 최소 3개 이상의 피드가 필요합니다.", "error");
+        let filteredEntries = [...entries];
+
+        // Filter by Date Range
+        if (dateRange !== 'all') {
+            const now = new Date();
+            const targetDate = new Date();
+
+            switch (dateRange) {
+                case '1w': targetDate.setDate(now.getDate() - 7); break;
+                case '2w': targetDate.setDate(now.getDate() - 14); break;
+                case '1m': targetDate.setMonth(now.getMonth() - 1); break;
+                case '2m': targetDate.setMonth(now.getMonth() - 2); break;
+            }
+
+            filteredEntries = entries.filter(entry => new Date(entry.date) >= targetDate);
+        }
+
+        if (filteredEntries.length < 3) {
+            addToast(`선택된 기간(${getRangeLabel(dateRange)}) 내의 피드가 부족합니다 (최소 3개 필요). 현재: ${filteredEntries.length}개`, "error");
             return;
         }
 
@@ -52,7 +80,7 @@ export default function AnalysisView() {
 
         setLocalLoading(true);
         try {
-            const result = await analyzeWriting(entries, selectedModel);
+            const result = await analyzeWriting(filteredEntries, selectedModel);
             addAnalysis(result);
             setLatestAnalysis(result);
             addToast("학습 분석이 완료되었습니다!");
@@ -65,19 +93,17 @@ export default function AnalysisView() {
         }
     };
 
-    const handleExport = () => {
-        const dataStr = JSON.stringify(history, null, 2);
-        const blob = new Blob([dataStr], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `analysis-history-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        addToast("분석 히스토리가 저장되었습니다.");
+    const getRangeLabel = (range: string) => {
+        switch (range) {
+            case '1w': return '최근 1주일';
+            case '2w': return '최근 2주일';
+            case '1m': return '최근 1개월';
+            case '2m': return '최근 2개월';
+            default: return '전체 기간';
+        }
     };
+
+
 
     if (!isLoaded) return null;
 
@@ -85,44 +111,65 @@ export default function AnalysisView() {
 
     return (
         <div className={styles.container}>
-            {/* Control Bar */}
-            <div className={styles.controls}>
-                <div className={styles.modelSelector}>
-                    <label htmlFor="model-select">AI Model:</label>
-                    <select
-                        id="model-select"
-                        value={selectedModel}
-                        onChange={(e) => setSelectedModel(e.target.value)}
-                        className={styles.select}
-                        disabled={isLoading}
-                    >
-                        {AVAILABLE_MODELS.map(m => (
-                            <option key={m.id} value={m.id}>{m.name}</option>
-                        ))}
-                    </select>
+            {/* Analysis Settings Modal */}
+            {isSettingsOpen && (
+                <div className={styles.overlay} onClick={() => setIsSettingsOpen(false)}>
+                    <div className={styles.modal} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalHeader}>
+                            <div className={styles.modalTitle}>
+                                <RefreshCw size={20} className={styles.refreshIcon} />
+                                <span>분석 설정 업데이트</span>
+                            </div>
+                            <button className={styles.closeButton} onClick={() => setIsSettingsOpen(false)}>
+                                <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>&times;</span>
+                            </button>
+                        </div>
+
+                        <div className={styles.modalBody}>
+                            <div className={styles.formGroup}>
+                                <label className={styles.label} htmlFor="modal-model-select">AI Model</label>
+                                <select
+                                    id="modal-model-select"
+                                    value={selectedModel}
+                                    onChange={(e) => setSelectedModel(e.target.value)}
+                                    className={styles.select}
+                                    style={{ width: '100%' }}
+                                >
+                                    {AVAILABLE_MODELS.map(m => (
+                                        <option key={m.id} value={m.id}>{m.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className={styles.formGroup}>
+                                <label className={styles.label} htmlFor="modal-range-select">분석 대상 기간</label>
+                                <select
+                                    id="modal-range-select"
+                                    value={dateRange}
+                                    onChange={(e) => setDateRange(e.target.value)}
+                                    className={styles.select}
+                                    style={{ width: '100%' }}
+                                >
+                                    <option value="all">전체 기간</option>
+                                    <option value="1w">최근 1주일</option>
+                                    <option value="2w">최근 2주일</option>
+                                    <option value="1m">최근 1개월</option>
+                                    <option value="2m">최근 2개월</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div className={styles.modalActions}>
+                            <button className={styles.cancelButton} onClick={() => setIsSettingsOpen(false)}>
+                                취소
+                            </button>
+                            <button className={styles.confirmButton} onClick={onConfirmAnalyze}>
+                                분석 시작
+                            </button>
+                        </div>
+                    </div>
                 </div>
-
-                <div className={styles.actions}>
-                    {/* Export Button - Small text link style */}
-                    <button onClick={handleExport} className={styles.textButton}>
-                        History Export
-                    </button>
-
-                    <button
-                        onClick={() => handleAnalyze(true)}
-                        className={styles.refreshButton}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? "분석 중..." : (
-                            <>
-                                <RefreshCw className={styles.refreshIcon} size={16} />
-                                <span>분석 갱신</span>
-                            </>
-                        )}
-                    </button>
-
-                </div>
-            </div>
+            )}
 
             {/* Info Text */}
             <div className={styles.infoText}>
@@ -141,22 +188,37 @@ export default function AnalysisView() {
             {!latestAnalysis && !isLoading ? (
                 <div className={styles.emptyState}>
                     <p>아직 분석된 데이터가 없습니다.</p>
-                    <button onClick={() => handleAnalyze(true)} className={styles.startButton} disabled={isLoading}>
+                    <button onClick={onAnalyzeClick} className={styles.startButton} disabled={isLoading}>
                         {isLoading ? "분석 중..." : "지금 내 실력 분석하기"}
                     </button>
                     {entries.length < 3 && <p className={styles.hint}>* 최소 3개의 피드가 필요합니다.</p>}
                 </div>
             ) : (
-                <div className={styles.reportGrid}>
-                    {/* Top Section */}
-                    {/* Main Analysis Section */}
-                    <LevelDiagnosis analysis={displayAnalysis} isLoading={isLoading} />
+                <>
+                    <div className={styles.reportGrid}>
+                        <LevelDiagnosis analysis={displayAnalysis} isLoading={isLoading} />
+                        <WeaknessAnalysis analysis={displayAnalysis} isLoading={isLoading} />
+                        <StrategySection analysis={displayAnalysis} isLoading={isLoading} />
+                        <VocabularySection analysis={displayAnalysis} isLoading={isLoading} />
+                        <QuizSection analysis={displayAnalysis} isLoading={isLoading} />
+                    </div>
 
-                    <WeaknessAnalysis analysis={displayAnalysis} isLoading={isLoading} />
-                    <StrategySection analysis={displayAnalysis} isLoading={isLoading} />
-                    <VocabularySection analysis={displayAnalysis} isLoading={isLoading} />
-                    <QuizSection analysis={displayAnalysis} isLoading={isLoading} />
-                </div>
+                    {/* Footer Actions */}
+                    <div className={styles.actionFooter}>
+                        <button
+                            onClick={onAnalyzeClick}
+                            className={styles.refreshButton}
+                            disabled={isLoading}
+                        >
+                            {isLoading ? "분석 중..." : (
+                                <>
+                                    <RefreshCw className={styles.refreshIcon} size={16} />
+                                    <span>분석 갱신</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </>
             )}
         </div>
     );

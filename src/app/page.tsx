@@ -12,10 +12,9 @@ import Modal from "@/components/Modal";
 import AnalysisView from "@/components/AnalysisView";
 
 export default function Home() {
-  const { entries, fetchEntries, addEntry, updateEntry, deleteEntry, importEntries, isLoaded } = useEntries();
+  const { entries, fetchEntries, addEntry, updateEntry, deleteEntry, isLoaded } = useEntries();
   const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
   const [activeTab, setActiveTab] = useState<'write' | 'list' | 'analysis'>('write');
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { addToast } = useToast();
 
   useEffect(() => {
@@ -48,76 +47,16 @@ export default function Home() {
     setEditingEntry(null);
   };
 
-  const handleExport = () => {
-    // ... same logic ...
-    const dataStr = JSON.stringify(entries, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `english-tutor-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    addToast("데이터가 내보내졌습니다.");
-  };
-
-  const handleImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    // ... same logic ...
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const content = e.target?.result as string;
-        const importedData = JSON.parse(content) as Entry[];
-        if (Array.isArray(importedData)) {
-          importEntries(importedData);
-          addToast("데이터를 성공적으로 가져왔습니다!");
-          setActiveTab('list');
-        } else {
-          addToast("올바르지 않은 파일 형식입니다.", "error");
-        }
-      } catch (error) {
-        console.error("Import failed:", error);
-        addToast("파일을 읽는 중 오류가 발생했습니다.", "error");
-      }
-    };
-    reader.readAsText(file);
-    event.target.value = "";
-  };
-
   return (
     <main className={styles.main}>
       <header className={styles.header}>
         <div className={styles.headerTop}>
           <h1 className={styles.title}>내 영어 과외 선생님</h1>
-          <div className={styles.headerActions}>
-            {/* Minimized Import/Export */}
-            <button onClick={handleImportClick} className={styles.miniLink}>
-              Import Data
-            </button>
-            <span className={styles.divider}>|</span>
-            <button onClick={handleExport} className={styles.miniLink}>
-              Export JSON
-            </button>
-          </div>
+
         </div>
         <p className={styles.subtitle}>매일 쓰고, 교정받고, 성장하세요</p>
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          accept=".json"
-          style={{ display: 'none' }}
-        />
+
       </header>
 
       {/* Tabs */}
@@ -170,6 +109,14 @@ export default function Home() {
                 }
               }}
               onEdit={handleEdit}
+              onUpdate={async (updatedEntry) => {
+                try {
+                  await updateEntry(updatedEntry.id, updatedEntry);
+                } catch (e) {
+                  console.error(e);
+                  addToast("업데이트 실패", "error");
+                }
+              }}
             />
           </section>
         )}

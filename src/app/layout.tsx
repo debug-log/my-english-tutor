@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 import { ToastProvider } from "@/lib/toast-context";
+import { DebugPanel } from "@/components/DebugPanel";
 
 export default function RootLayout({
   children,
@@ -19,7 +20,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          {children}
+          <DebugPanel />
+        </ToastProvider>
       </body>
     </html>
   );

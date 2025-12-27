@@ -49,6 +49,408 @@
     }
 }
 
+/* Base AI Button Style */
+.aiCorrectButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.25rem;
+
+    /* Modern AI Gradient */
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 5s ease infinite;
+    /* Subtle movement */
+
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    border: none;
+    border-radius: 9999px;
+    /* Pill shape */
+    cursor: pointer;
+
+    /* Glow - Removed by default, shown on hover */
+    box-shadow: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.aiCorrectButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 9999px;
+    padding: 2px;
+    /* Border width */
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.aiCorrectButton:hover {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.35);
+    filter: brightness(1.05);
+}
+
+.aiCorrectButton:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.aiCorrectButton:disabled {
+    background: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+    animation: none;
+}
+
+.aiCorrectButton.loading {
+    background: linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #e879f9 100%);
+    animation: gradientShift 3s ease infinite, pulse 2s infinite;
+    cursor: wait;
+}
+
+.spin {
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.02);
+        opacity: 0.9;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Variant for smaller retry button if needed, but keeping it unified for now or handled via inline removal */
+.aiRetryButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    color: white;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    box-shadow: 0 3px 10px rgba(59, 130, 246, 0.2);
+    transition: all 0.3s ease;
+}
+
+.aiRetryButton:hover {
+    transform: translateY(-0.5px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+    filter: brightness(1.05);
+}
+
+.aiResultSection {
+    background: rgba(139, 92, 246, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-top: 1rem;
+    position: relative;
+    border-left: 4px solid rgba(139, 92, 246, 0.4);
+}
+
+.aiHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Space out title and regenerate btn */
+    margin-bottom: 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.aiHeaderLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.aiRegenerateBtn {
+    background: transparent;
+    border: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    padding: 0.2rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.aiRegenerateBtn:hover {
+    color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.aiRegenerateBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.aiIcon {
+    color: #8b5cf6;
+    opacity: 0.7;
+}
+
+.aiText {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--secondary-foreground);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+    white-space: pre-wrap;
+    letter-spacing: -0.01em;
+}
+
+.aiNotesHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.aiNotesTitle {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.expandBtn {
+    background: transparent;
+    border: none;
+    color: #8b5cf6;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.expandBtn:hover {
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.aiNotesWrapper {
+    background: rgba(255, 255, 255, 0.6);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(139, 92, 246, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.aiNotesContent {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    max-height: 4.8em;
+    /* Exactly 3 lines */
+    opacity: 1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    padding: 2px 0;
+}
+
+.aiNotesContent.expanded {
+    max-height: 2000px;
+    opacity: 1;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+}
+
+.aiNotes *:first-child {
+    margin-top: 0;
+}
+
+.aiNotes ul,
+.aiNotes ol {
+    padding-left: 1.25rem;
+    margin: 0;
+}
+
+.aiNotes p+p {
+    margin-top: 0.75rem;
+}
+
+/* Skeleton Loader */
+.skeletonSection {
+    background: rgba(139, 92, 246, 0.02);
+    border: 1px dashed rgba(139, 92, 246, 0.2);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-top: 1rem;
+    border-left: 4px solid rgba(139, 92, 246, 0.2);
+}
+
+.skeletonLine {
+    height: 1rem;
+    background: linear-gradient(90deg,
+            rgba(139, 92, 246, 0.05) 25%,
+            rgba(139, 92, 246, 0.1) 50%,
+            rgba(139, 92, 246, 0.05) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: 4px;
+    margin-bottom: 0.75rem;
+}
+
+.skeletonLine:last-child {
+    margin-bottom: 0;
+    width: 80%;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Inline Confirm Styles */
+.aiConfirmInline {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(139, 92, 246, 0.1);
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    animation: fadeIn 0.3s ease;
+}
+
+.aiConfirmText {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #8b5cf6;
+}
+
+.aiConfirmActions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.confirmActionBtn,
+.cancelActionBtn {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.confirmActionBtn {
+    background: #8b5cf6;
+    color: white;
+}
+
+.confirmActionBtn:hover {
+    background: #7c3aed;
+}
+
+.cancelActionBtn {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--muted-foreground);
+}
+
+.cancelActionBtn:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.aiNotes {
+    font-size: 0.8rem;
+    color: var(--muted-foreground);
+    line-height: 1.6;
+}
+
+.aiNotes strong {
+    font-weight: 700;
+}
+
+.aiButtonFooter {
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    margin-top: 1.5rem;
+}
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.originalOnlyWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    /* Move items code right */
+    width: 100%;
+}
+
 .iconBtn {
     background: transparent;
     border: none;
@@ -121,6 +523,8 @@
 }
 
 .text {
+    width: 100%;
+    text-align: left;
     white-space: pre-wrap;
     color: var(--card-foreground);
 }

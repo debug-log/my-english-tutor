@@ -44,6 +44,8 @@ export const useEntries = create<EntryStore>((set, get) => ({
                 originalText: row.original_text,
                 correction: row.correction,
                 notes: row.notes,
+                aiCorrection: row.ai_correction,
+                aiNotes: row.ai_notes,
                 tags: row.tags
             }));
 
@@ -83,6 +85,8 @@ export const useEntries = create<EntryStore>((set, get) => ({
                 originalText: data.original_text,
                 correction: data.correction,
                 notes: data.notes,
+                aiCorrection: data.ai_correction,
+                aiNotes: data.ai_notes,
                 tags: data.tags
             };
 
@@ -107,7 +111,14 @@ export const useEntries = create<EntryStore>((set, get) => ({
             if (updated.originalText) payload.original_text = normalizeContent(updated.originalText);
             if (updated.correction) payload.correction = normalizeContent(updated.correction);
             if (updated.notes !== undefined) payload.notes = updated.notes;
+            if (updated.aiCorrection) payload.ai_correction = normalizeContent(updated.aiCorrection);
+            if (updated.aiNotes !== undefined) payload.ai_notes = updated.aiNotes;
             if (updated.tags) payload.tags = updated.tags;
+
+            // Debug Log Payload
+            import('./debug-store').then(({ useDebugStore }) => {
+                useDebugStore.getState().addLog('query', 'Update Entry Payload', { id, payload });
+            });
 
             const { data, error } = await supabase
                 .from('entries')
@@ -118,13 +129,29 @@ export const useEntries = create<EntryStore>((set, get) => ({
 
             if (error) throw error;
 
+            // Debug Log Success
+            import('./debug-store').then(({ useDebugStore }) => {
+                useDebugStore.getState().addLog('success', 'Update Entry DB Success', data);
+            });
+
             set((state) => ({
                 entries: state.entries.map((e) =>
-                    e.id === id ? { ...e, ...updated, originalText: data.original_text, correction: data.correction } : e
+                    e.id === id ? {
+                        ...e,
+                        ...updated,
+                        originalText: data.original_text,
+                        correction: data.correction,
+                        aiCorrection: data.ai_correction,
+                        aiNotes: data.ai_notes
+                    } : e
                 )
             }));
         } catch (e: any) {
             console.error("Failed to update entry", e);
+            // Debug Log Error
+            import('./debug-store').then(({ useDebugStore }) => {
+                useDebugStore.getState().addLog('error', 'Update Entry DB Failed', e);
+            });
             set({ error: e.message });
             throw e;
         } finally {

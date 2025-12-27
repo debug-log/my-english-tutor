@@ -7,9 +7,10 @@ interface EntryListProps {
     entries: Entry[];
     onDelete: (id: string) => void;
     onEdit: (entry: Entry) => void;
+    onUpdate?: (entry: Entry) => void;
 }
 
-export default function EntryList({ entries, onDelete, onEdit }: EntryListProps) {
+export default function EntryList({ entries, onDelete, onEdit, onUpdate }: EntryListProps) {
     if (entries.length === 0) {
         return (
             <div className={styles.empty}>
@@ -62,6 +63,7 @@ export default function EntryList({ entries, onDelete, onEdit }: EntryListProps)
                                 entry={entry}
                                 onEdit={onEdit}
                                 onDelete={onDelete}
+                                onUpdate={onUpdate}
                                 hideDate={true}
                             />
                         ))}

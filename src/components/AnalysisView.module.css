@@ -25,18 +25,27 @@
     }
 }
 
-/* Controls Bar */
+/* Controls Bar - Deprecated placement, reusing for specific button styling if needed */
 .controls {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--card);
-    padding: 1rem 1.5rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    flex-wrap: wrap;
+    justify-content: flex-end;
+    /* Align right */
     gap: 1rem;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    margin-top: 1rem;
+    padding-bottom: 2rem;
+    /* Add bottom padding for scroll */
+}
+
+.actionFooter {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 3rem;
+    margin-bottom: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    /* Optional separator */
 }
 
 .modelSelector {
@@ -49,14 +58,31 @@
 }
 
 .select {
-    padding: 0.4rem 0.75rem;
+    padding: 0.6rem 1rem;
+    padding-right: 2.5rem;
     border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--background);
+    border-radius: 8px;
+    background-color: var(--card);
+    /* Ensure matches card background */
     color: var(--foreground);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     cursor: pointer;
     min-width: 150px;
+
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    background-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 }
 
 .actions {
@@ -362,6 +388,12 @@
     /* Better Korean wrapping */
 }
 
+.rubricImprovement {
+    font-size: 0.85rem;
+    color: var(--muted-foreground);
+    margin-top: 0.4rem;
+}
+
 /* Shared Card Style */
 .cardBox {
     background: var(--card);
@@ -380,7 +412,11 @@
 }
 
 .weaknessItem {
-    composes: cardBox;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
     border-left: 3px solid var(--destructive);
     /* Subtle indicator instead of full color */
 }
@@ -485,7 +521,11 @@
 }
 
 .strategyItem {
-    composes: cardBox;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
 }
 
 .strategyHeader {
@@ -565,7 +605,11 @@
 }
 
 .vocabCard {
-    composes: cardBox;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
     gap: 0.5rem;
     display: flex;
     flex-direction: column;
@@ -604,7 +648,11 @@
 }
 
 .quizCard {
-    composes: cardBox;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
 }
 
 .quizQuestion {
@@ -672,5 +720,157 @@
 @media (max-width: 640px) {
     .rubricGrid {
         grid-template-columns: 1fr;
+    }
+}
+
+/* Modal Styles */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.modal {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    border: 1px solid var(--border);
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modalTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--foreground);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    color: var(--muted-foreground);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.closeButton:hover {
+    background: var(--muted);
+    color: var(--foreground);
+}
+
+.modalBody {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.modalActions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+.cancelButton {
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--background);
+    color: var(--foreground);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancelButton:hover {
+    background: var(--muted);
+}
+
+.confirmButton {
+    padding: 0.6rem 1.25rem;
+    border-radius: 6px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+}
+
+.confirmButton:hover {
+    background: var(--primary-foreground);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(37, 99, 235, 0.3);
+}
+
+.confirmButton:active {
+    transform: translateY(0);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
