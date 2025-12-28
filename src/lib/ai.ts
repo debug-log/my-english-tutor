@@ -97,7 +97,7 @@ export async function correctText(text: string, modelName = "gemini-2.5-flash-li
   }
 }
 
-export async function analyzeWriting(entries: Entry[], modelName = DEFAULT_MODEL_NAME): Promise<AnalysisResult> {
+export async function analyzeWriting(entries: Entry[], modelName = DEFAULT_MODEL_NAME, previousAnalysis?: AnalysisResult | null): Promise<AnalysisResult> {
   try {
     // Optimization: Limit to max 30 entries to save tokens (increased from 15)
     const MAX_ENTRIES = 30;
@@ -126,7 +126,22 @@ export async function analyzeWriting(entries: Entry[], modelName = DEFAULT_MODEL
 
     console.log(`Analyzing ${recentEntriesList.length} entries (capped at ${MAX_ENTRIES}) from the last 3 months.`);
 
-    const prompt = getAnalysisPrompt(recentEntries);
+    // Construct Previous Context String
+    let previousContext = "";
+    if (previousAnalysis) {
+      const prevVocab = previousAnalysis.vocabularyList?.map((v: any) => v.word).join(", ");
+      const prevWeakness = previousAnalysis.rubricAnalysis?.grammar?.diagnosis;
+      const prevQuiz = previousAnalysis.quiz?.map((q: any) => q.question).join("\n- ");
+
+      previousContext = `
+        - 지난번 추천 어휘: ${prevVocab || "없음"}
+        - 지난번 지적 사항: ${prevWeakness || "없음"}
+        - 지난번 퀴즈 질문:
+          - ${prevQuiz || "없음"}
+      `;
+    }
+
+    const prompt = getAnalysisPrompt(recentEntries, previousContext);
 
     console.log("Sending prompt to Gemini:", modelName);
 

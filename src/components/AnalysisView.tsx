@@ -80,7 +80,7 @@ export default function AnalysisView() {
 
         setLocalLoading(true);
         try {
-            const result = await analyzeWriting(filteredEntries, selectedModel);
+            const result = await analyzeWriting(filteredEntries, selectedModel, latestAnalysis);
             addAnalysis(result);
             setLatestAnalysis(result);
             addToast("학습 분석이 완료되었습니다!");
