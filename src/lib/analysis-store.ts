@@ -69,7 +69,8 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
                 const { data, error } = await supabase
                     .from('analysis_history')
                     .select('*')
-                    .order('date', { ascending: false });
+                    .order('date', { ascending: false })
+                    .limit(1);
 
                 if (error) throw error;
 
@@ -98,7 +99,23 @@ export const useAnalysisStore = create<AnalysisState>((set, get) => ({
 
             if (error) throw error;
 
-            set((state) => ({ history: [result, ...state.history] }));
+            // Optional: Keep only the latest few records to prevent table bloat
+            // Since we only care about the latest, we could even delete all other records for this user
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: oldRecords } = await supabase
+                    .from('analysis_history')
+                    .select('id')
+                    .order('date', { ascending: false })
+                    .range(5, 100); // Keep top 5, get IDs of others
+
+                if (oldRecords && oldRecords.length > 0) {
+                    const idsToDelete = oldRecords.map(r => r.id);
+                    await supabase.from('analysis_history').delete().in('id', idsToDelete);
+                }
+            }
+
+            set((state) => ({ history: [result] })); // Update state to only have the latest one
         } catch (e: any) {
             console.error("Failed to save analysis", e);
             set({ error: e.message });
